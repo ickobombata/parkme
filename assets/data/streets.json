@@ -1,0 +1,115 @@
+[
+  {
+    "name": "Main Street",
+    "zoneId": "zone_1",
+    "coordinates": [
+      {"latitude": 40.7128, "longitude": -74.0060, "radius": 100},
+      {"latitude": 40.7130, "longitude": -74.0058, "radius": 100},
+      {"latitude": 40.7132, "longitude": -74.0056, "radius": 100}
+    ]
+  },
+  {
+    "name": "Central Avenue", 
+    "zoneId": "zone_1",
+    "coordinates": [
+      {"latitude": 40.7125, "longitude": -74.0065, "radius": 100},
+      {"latitude": 40.7127, "longitude": -74.0063, "radius": 100}
+    ]
+  },
+  {
+    "name": "Downtown Boulevard",
+    "zoneId": "zone_1", 
+    "coordinates": [
+      {"latitude": 40.7120, "longitude": -74.0070, "radius": 120},
+      {"latitude": 40.7122, "longitude": -74.0068, "radius": 120}
+    ]
+  },
+  {
+    "name": "Oak Street",
+    "zoneId": "zone_2",
+    "coordinates": [
+      {"latitude": 40.7140, "longitude": -74.0070, "radius": 75},
+      {"latitude": 40.7142, "longitude": -74.0068, "radius": 75}
+    ]
+  },
+  {
+    "name": "Pine Avenue",
+    "zoneId": "zone_2",
+    "coordinates": [
+      {"latitude": 40.7145, "longitude": -74.0075, "radius": 75},
+      {"latitude": 40.7147, "longitude": -74.0073, "radius": 75}
+    ]
+  },
+  {
+    "name": "Maple Road",
+    "zoneId": "zone_2",
+    "coordinates": [
+      {"latitude": 40.7150, "longitude": -74.0080, "radius": 75},
+      {"latitude": 40.7152, "longitude": -74.0078, "radius": 75}
+    ]
+  },
+  {
+    "name": "Business Plaza",
+    "zoneId": "zone_3",
+    "coordinates": [
+      {"latitude": 40.7120, "longitude": -74.0050, "radius": 150},
+      {"latitude": 40.7122, "longitude": -74.0048, "radius": 150}
+    ]
+  },
+  {
+    "name": "Corporate Drive",
+    "zoneId": "zone_3",
+    "coordinates": [
+      {"latitude": 40.7115, "longitude": -74.0055, "radius": 150},
+      {"latitude": 40.7117, "longitude": -74.0053, "radius": 150}
+    ]
+  },
+  {
+    "name": "Office Street", 
+    "zoneId": "zone_3",
+    "coordinates": [
+      {"latitude": 40.7110, "longitude": -74.0060, "radius": 150},
+      {"latitude": 40.7112, "longitude": -74.0058, "radius": 150}
+    ]
+  },
+  {
+    "name": "Mall Avenue",
+    "zoneId": "zone_4",
+    "coordinates": [
+      {"latitude": 40.7160, "longitude": -74.0040, "radius": 100},
+      {"latitude": 40.7162, "longitude": -74.0038, "radius": 100}
+    ]
+  },
+  {
+    "name": "Shop Street",
+    "zoneId": "zone_4", 
+    "coordinates": [
+      {"latitude": 40.7165, "longitude": -74.0045, "radius": 100},
+      {"latitude": 40.7167, "longitude": -74.0043, "radius": 100}
+    ]
+  },
+  {
+    "name": "Market Road",
+    "zoneId": "zone_4",
+    "coordinates": [
+      {"latitude": 40.7170, "longitude": -74.0050, "radius": 100},
+      {"latitude": 40.7172, "longitude": -74.0048, "radius": 100}
+    ]
+  },
+  {
+    "name": "Hospital Drive",
+    "zoneId": "zone_5",
+    "coordinates": [
+      {"latitude": 40.7180, "longitude": -74.0030, "radius": 80},
+      {"latitude": 40.7182, "longitude": -74.0028, "radius": 80}
+    ]
+  },
+  {
+    "name": "Medical Center Boulevard",
+    "zoneId": "zone_5",
+    "coordinates": [
+      {"latitude": 40.7185, "longitude": -74.0035, "radius": 80},
+      {"latitude": 40.7187, "longitude": -74.0033, "radius": 80}
+    ]
+  }
+] 

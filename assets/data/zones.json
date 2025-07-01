@@ -1,0 +1,42 @@
+[
+  {
+    "id": "zone_1",
+    "name": "City Center",
+    "code": "CC",
+    "hourlyRate": 2.50,
+    "smsNumber": "1234",
+    "streets": ["Main Street", "Central Avenue", "Downtown Boulevard"]
+  },
+  {
+    "id": "zone_2", 
+    "name": "Residential Area",
+    "code": "RA",
+    "hourlyRate": 1.50,
+    "smsNumber": "1234",
+    "streets": ["Oak Street", "Pine Avenue", "Maple Road"]
+  },
+  {
+    "id": "zone_3",
+    "name": "Business District", 
+    "code": "BD",
+    "hourlyRate": 3.00,
+    "smsNumber": "1234",
+    "streets": ["Business Plaza", "Corporate Drive", "Office Street"]
+  },
+  {
+    "id": "zone_4",
+    "name": "Shopping District",
+    "code": "SD", 
+    "hourlyRate": 2.00,
+    "smsNumber": "1234",
+    "streets": ["Mall Avenue", "Shop Street", "Market Road"]
+  },
+  {
+    "id": "zone_5",
+    "name": "Hospital Area",
+    "code": "HA",
+    "hourlyRate": 1.00,
+    "smsNumber": "1234", 
+    "streets": ["Hospital Drive", "Medical Center Boulevard"]
+  }
+] 
