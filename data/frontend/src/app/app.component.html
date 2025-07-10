@@ -1,0 +1,63 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #drawer class="sidenav" fixedInViewport
+      [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+      [mode]="(isHandset$ | async) ? 'over' : 'side'"
+      [opened]="(isHandset$ | async) === false">
+    
+    <mat-toolbar>
+      <mat-icon class="logo-icon">home</mat-icon>
+      <span class="logo-text">Home IoT</span>
+    </mat-toolbar>
+    
+    <mat-nav-list>
+      <mat-list-item 
+        *ngFor="let item of navigationItems" 
+        [routerLink]="item.route"
+        routerLinkActive="active-nav-item"
+        class="nav-item">
+        <mat-icon matListIcon>{{ item.icon }}</mat-icon>
+        <span matLine>{{ item.name }}</span>
+      </mat-list-item>
+    </mat-nav-list>
+    
+    <div class="spacer"></div>
+    
+    <mat-divider></mat-divider>
+    
+    <mat-nav-list>
+      <mat-list-item class="nav-item">
+        <mat-icon matListIcon>info</mat-icon>
+        <span matLine>About</span>
+      </mat-list-item>
+    </mat-nav-list>
+  </mat-sidenav>
+  
+  <mat-sidenav-content>
+    <mat-toolbar color="primary">
+      <button
+        type="button"
+        aria-label="Toggle sidenav"
+        mat-icon-button
+        (click)="drawer.toggle()"
+        *ngIf="isHandset$ | async">
+        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+      </button>
+      
+      <span class="title">{{ title }}</span>
+      
+      <div class="spacer"></div>
+      
+      <button mat-icon-button aria-label="Refresh">
+        <mat-icon>refresh</mat-icon>
+      </button>
+      
+      <button mat-icon-button aria-label="Settings">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    </mat-toolbar>
+    
+    <div class="content">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container> 

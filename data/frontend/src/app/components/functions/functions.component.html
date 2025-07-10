@@ -1,0 +1,153 @@
+<div class="functions-container">
+  <div class="header">
+    <h1>Device Functions</h1>
+    <p>Control your IoT devices from here</p>
+  </div>
+
+  <div class="functions-grid">
+    <mat-card class="function-card water-control">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>water_drop</mat-icon>
+          Water Control
+        </mat-card-title>
+        <mat-card-subtitle>Control the watering system</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="control-section">
+          <mat-form-field appearance="outline">
+            <mat-label>Select Device</mat-label>
+            <mat-select [(value)]="selectedDevice">
+              <mat-option *ngFor="let device of devices" 
+                         [value]="device.id" 
+                         [disabled]="!isPumpDevice(device)">
+                {{ device.name }}
+                <mat-icon [style.color]="getDeviceStatusColor(device.status)">
+                  {{ device.status === 'online' ? 'check_circle' : 'offline_bolt' }}
+                </mat-icon>
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Duration (seconds)</mat-label>
+            <input matInput 
+                   type="number" 
+                   [(ngModel)]="waterDuration"
+                   min="1" 
+                   max="60">
+            <mat-hint>Maximum 60 seconds</mat-hint>
+          </mat-form-field>
+
+          <mat-slider 
+            class="duration-slider"
+            [min]="1" 
+            [max]="60" 
+            [step]="1"
+            [(ngModel)]="waterDuration">
+          </mat-slider>
+        </div>
+
+        <div class="action-buttons">
+          <button mat-raised-button 
+                  color="primary" 
+                  (click)="onStartWatering()"
+                  [disabled]="loading || !isDeviceOnline(selectedDevice)">
+            <mat-icon>play_arrow</mat-icon>
+            Start Watering ({{ waterDuration }}s)
+          </button>
+
+          <button mat-raised-button 
+                  color="warn" 
+                  (click)="onStopWatering()"
+                  [disabled]="loading || !isDeviceOnline(selectedDevice)">
+            <mat-icon>stop</mat-icon>
+            Stop Watering
+          </button>
+        </div>
+
+        <div class="status-info" *ngIf="selectedDevice">
+          <mat-chip-listbox>
+            <mat-chip-option 
+              [style.background-color]="getDeviceStatusColor(deviceService.getDeviceById(selectedDevice)?.status || 'offline')">
+              {{ deviceService.getDeviceById(selectedDevice)?.status || 'offline' }}
+            </mat-chip-option>
+          </mat-chip-listbox>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="function-card device-management">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>settings</mat-icon>
+          Device Management
+        </mat-card-title>
+        <mat-card-subtitle>Manage your devices</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="device-grid">
+          <div *ngFor="let device of devices" class="device-item">
+            <div class="device-info">
+              <mat-icon [style.color]="getDeviceStatusColor(device.status)">
+                {{ device.device_type === 'pump' ? 'water_drop' : 'sensors' }}
+              </mat-icon>
+              <div class="device-details">
+                <div class="device-name">{{ device.name }}</div>
+                <div class="device-type">{{ device.device_type | titlecase }}</div>
+                <div class="device-location">{{ device.location }}</div>
+              </div>
+            </div>
+            <div class="device-actions">
+              <button mat-icon-button 
+                      [disabled]="device.status !== 'online'"
+                      matTooltip="Device Info">
+                <mat-icon>info</mat-icon>
+              </button>
+              <button mat-icon-button 
+                      [disabled]="device.status !== 'online'"
+                      matTooltip="Configure">
+                <mat-icon>settings</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="function-card future-functions">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>extension</mat-icon>
+          Future Functions
+        </mat-card-title>
+        <mat-card-subtitle>Coming soon...</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="future-list">
+          <div class="future-item">
+            <mat-icon>wb_sunny</mat-icon>
+            <span>Light Control</span>
+          </div>
+          <div class="future-item">
+            <mat-icon>ac_unit</mat-icon>
+            <span>Climate Control</span>
+          </div>
+          <div class="future-item">
+            <mat-icon>security</mat-icon>
+            <span>Security System</span>
+          </div>
+          <div class="future-item">
+            <mat-icon>camera</mat-icon>
+            <span>Camera Monitoring</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="loading-overlay" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Processing command...</p>
+  </div>
+</div> 

@@ -1,0 +1,88 @@
+# IoT System Configuration - Mixed Communication Mode
+# Each device can be configured for either serial or MQTT communication
+
+# MQTT Configuration (for WiFi-enabled devices)
+mqtt:
+  broker_host: 'localhost'
+  broker_port: 1883
+  username: null
+  password: null
+
+# Device Configuration - specify communication method per device
+devices:
+  # Dummy device for testing (no hardware required)
+  - id: 'dummy_controller'
+    name: 'Test Controller'
+    device_type: 'controller'
+    location: 'Test Environment'
+    description: 'Dummy device for testing without hardware'
+    communication: 'dummy'
+    capabilities: ['water_control', 'temperature_reading', 'humidity_reading', 'status_reporting']
+    config:
+      response_delay: 0.1  # Simulate slight delay
+      simulate_errors: false
+      
+  # Serial connected devices (commented out for testing)
+  # - id: 'arduino_pump'
+  #   name: 'Arduino Water Pump'
+  #   device_type: 'pump'
+  #   location: 'Balcony'
+  #   description: 'Main watering pump for balcony plants'
+  #   communication: 'serial'
+  #   capabilities: ['water_control', 'status_reporting']
+  #   config:
+  #     port: '/dev/ttyUSB0'
+  #     baudrate: 115200
+  #     timeout: 5
+  #     max_water_duration: 60
+  #     default_water_duration: 5
+  #     
+  # - id: 'arduino_sensors'
+  #   name: 'Arduino Sensor Array'
+  #   device_type: 'sensor'
+  #   location: 'Garden'
+  #   description: 'Temperature, humidity, and soil moisture sensors'
+  #   communication: 'serial'
+  #   capabilities: ['temperature_reading', 'humidity_reading', 'soil_moisture_reading']
+  #   config:
+  #     port: '/dev/ttyUSB1'
+  #     baudrate: 115200
+  #     timeout: 5
+  #     reading_interval: 30
+      
+  # MQTT connected devices (WiFi) - commented out for testing
+  # - id: 'esp32_outdoor'
+  #   name: 'ESP32 Outdoor Station'
+  #   device_type: 'controller'
+  #   location: 'Garden'
+  #   description: 'WiFi-enabled outdoor sensor and control station'
+  #   communication: 'mqtt'
+  #   capabilities: ['water_control', 'temperature_reading', 'humidity_reading', 'light_control']
+  #   config:
+  #     mqtt_topic: 'devices/esp32_outdoor'
+  #     ip_address: '192.168.1.100'
+  #     max_water_duration: 60
+  #     
+  # - id: 'esp8266_indoor'
+  #   name: 'ESP8266 Indoor Monitor'
+  #   device_type: 'sensor'
+  #   location: 'Living Room'
+  #   description: 'WiFi-enabled indoor environmental monitor'
+  #   communication: 'mqtt'
+  #   capabilities: ['temperature_reading', 'humidity_reading', 'air_quality_reading']
+  #   config:
+  #     mqtt_topic: 'devices/esp8266_indoor'
+  #     ip_address: '192.168.1.101'
+  #     reading_interval: 60
+  
+# Database Configuration
+database:
+  path: 'data/iot_system.db'
+  
+# System Configuration
+system:
+  default_water_duration: 5
+  max_water_duration: 60
+  sensor_read_interval: 30
+  device_heartbeat_interval: 60
+  log_level: 'INFO' 

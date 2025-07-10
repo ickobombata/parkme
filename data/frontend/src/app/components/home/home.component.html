@@ -1,0 +1,122 @@
+<div class="home-container">
+  <div class="header">
+    <h1>System Dashboard</h1>
+    <button mat-raised-button color="primary" (click)="onRefresh()">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </div>
+
+  <div class="stats-grid" *ngIf="!loading">
+    <mat-card class="stat-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>devices</mat-icon>
+          Total Devices
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="stat-value">{{ stats.totalDevices }}</div>
+        <div class="stat-subtitle">{{ stats.onlineDevices }} online</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>thermostat</mat-icon>
+          Temperature
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="stat-value">{{ stats.temperature }}°C</div>
+        <div class="stat-subtitle">Current reading</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>water_drop</mat-icon>
+          Humidity
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="stat-value">{{ stats.humidity }}%</div>
+        <div class="stat-subtitle">Current reading</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>grass</mat-icon>
+          Soil Moisture
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="stat-value">{{ stats.soilMoisture }}%</div>
+        <div class="stat-subtitle">Current reading</div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="content-grid" *ngIf="!loading">
+    <mat-card class="device-card">
+      <mat-card-header>
+        <mat-card-title>Device Status</mat-card-title>
+        <mat-card-subtitle>{{ lastUpdated | date:'medium' }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="device-list">
+          <div *ngFor="let device of devices" class="device-item">
+            <div class="device-info">
+              <mat-icon [style.color]="getDeviceStatusColor(device.status)">
+                {{ getDeviceStatusIcon(device.status) }}
+              </mat-icon>
+              <div class="device-details">
+                <div class="device-name">{{ device.name }}</div>
+                <div class="device-location">{{ device.location }}</div>
+              </div>
+            </div>
+            <div class="device-status">
+              <mat-chip [style.background-color]="getDeviceStatusColor(device.status)">
+                {{ device.status }}
+              </mat-chip>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="sensor-card">
+      <mat-card-header>
+        <mat-card-title>Recent Sensor Readings</mat-card-title>
+        <mat-card-subtitle>Latest data from all sensors</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="sensor-readings" *ngIf="sensorData.length > 0; else noSensorData">
+          <div *ngFor="let reading of sensorData" class="sensor-reading">
+            <mat-icon class="sensor-icon">{{ getSensorIcon(reading.sensor_type) }}</mat-icon>
+            <div class="sensor-info">
+              <div class="sensor-type">{{ reading.sensor_type | titlecase }}</div>
+              <div class="sensor-value">{{ formatSensorValue(reading.value, reading.unit) }}</div>
+              <div class="sensor-timestamp">{{ reading.timestamp | date:'short' }}</div>
+            </div>
+          </div>
+        </div>
+        <ng-template #noSensorData>
+          <div class="no-data">
+            <mat-icon>sensors_off</mat-icon>
+            <p>No sensor data available</p>
+          </div>
+        </ng-template>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading dashboard data...</p>
+  </div>
+</div> 
