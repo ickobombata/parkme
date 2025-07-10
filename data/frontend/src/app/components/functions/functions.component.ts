@@ -11,14 +11,16 @@ export class FunctionsComponent implements OnInit {
   devices: Device[] = [];
   loading = false;
   waterDuration = 5;
-  selectedDevice = 'arduino_pump';
+  selectedDevice = 'dummy_controller';
 
   constructor(
-    private deviceService: DeviceService,
+    public deviceService: DeviceService,
     private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
+    // Load devices from backend
+    this.deviceService.refreshDevices();
     this.loadDevices();
   }
 

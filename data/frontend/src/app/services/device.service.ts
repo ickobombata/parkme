@@ -63,21 +63,25 @@ export class DeviceService {
 
   // Device operations
   refreshDevices(): void {
+    console.log('DeviceService: Refreshing devices from backend...');
     this.loadingSubject.next(true);
     this.getDevices().subscribe({
       next: (devices) => {
+        console.log('DeviceService: Received devices from backend:', devices);
         this.devicesSubject.next(devices);
         this.loadingSubject.next(false);
       },
       error: (error) => {
-        console.error('Error loading devices:', error);
+        console.error('DeviceService: Error loading devices:', error);
         this.loadingSubject.next(false);
       }
     });
   }
 
   getDevices(): Observable<Device[]> {
-    return this.http.get<Device[]>(`${this.apiUrl}/devices`)
+    const url = `${this.apiUrl}/devices`;
+    console.log('DeviceService: Making API call to:', url);
+    return this.http.get<Device[]>(url)
       .pipe(
         catchError(this.handleError)
       );

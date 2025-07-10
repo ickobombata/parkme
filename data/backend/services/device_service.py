@@ -43,6 +43,9 @@ class DeviceService:
             # Start device monitoring
             asyncio.create_task(self._monitor_devices())
             
+            # Check device status immediately on startup
+            asyncio.create_task(self._initial_device_status_check())
+            
             logger.info("Device service initialized successfully")
             
         except Exception as e:
@@ -301,21 +304,38 @@ class DeviceService:
                 devices = await self.get_all_devices()
                 
                 for device in devices:
-                    # Check if device is offline (no heartbeat for 5 minutes)
-                    if device.last_seen:
+                    # Get current device status from communication service
+                    current_status = await self._get_device_status(device.id)
+                    
+                    # Update device status if it has changed
+                    if current_status != device.status:
+                        await self.db_service.update_device_status(device.id, current_status)
+                        
+                        # Log status change
+                        await self.db_service.add_log(LogEntry(
+                            level=LogLevel.INFO if current_status == DeviceStatus.ONLINE else LogLevel.WARNING,
+                            message=f"Device status changed: {device.status.value} -> {current_status.value}",
+                            device_id=device.id,
+                            component="device_service",
+                            timestamp=datetime.now()
+                        ))
+                        
+                        logger.info(f"Device {device.id} status updated: {current_status.value}")
+                    
+                    # Also check heartbeat-based offline detection for MQTT/Serial devices
+                    if device.last_seen and current_status == DeviceStatus.ONLINE:
                         time_since_last_seen = datetime.now() - device.last_seen
                         if time_since_last_seen > timedelta(minutes=5):
-                            if device.status != DeviceStatus.OFFLINE:
-                                await self.db_service.update_device_status(device.id, DeviceStatus.OFFLINE)
-                                
-                                # Log device offline
-                                await self.db_service.add_log(LogEntry(
-                                    level=LogLevel.WARNING,
-                                    message=f"Device went offline",
-                                    device_id=device.id,
-                                    component="device_service",
-                                    timestamp=datetime.now()
-                                ))
+                            await self.db_service.update_device_status(device.id, DeviceStatus.OFFLINE)
+                            
+                            # Log device offline
+                            await self.db_service.add_log(LogEntry(
+                                level=LogLevel.WARNING,
+                                message=f"Device went offline (no heartbeat)",
+                                device_id=device.id,
+                                component="device_service",
+                                timestamp=datetime.now()
+                            ))
                 
                 # Wait before next check
                 await asyncio.sleep(60)  # Check every minute
@@ -323,6 +343,58 @@ class DeviceService:
             except Exception as e:
                 logger.error(f"Error in device monitoring: {e}")
                 await asyncio.sleep(60)
+    
+    async def _get_device_status(self, device_id: str) -> DeviceStatus:
+        """Get current device status from communication service"""
+        try:
+            # Check if device is connected via communication service
+            if isinstance(self.communication_service, MixedCommunicationService):
+                if self.communication_service.is_device_connected(device_id):
+                    comm_type = self.communication_service.get_device_communication_type(device_id)
+                    
+                    if comm_type == 'dummy':
+                        # For dummy devices, get status from dummy service
+                        if self.communication_service.dummy_service:
+                            return await self.communication_service.dummy_service.get_device_status(device_id)
+                    elif comm_type in ['mqtt', 'serial']:
+                        # For MQTT/Serial devices, we'll rely on heartbeat mechanism
+                        return DeviceStatus.ONLINE
+                        
+            return DeviceStatus.OFFLINE
+            
+        except Exception as e:
+            logger.error(f"Error getting device status for {device_id}: {e}")
+            return DeviceStatus.OFFLINE
+    
+    async def _initial_device_status_check(self):
+        """Check device status immediately on startup"""
+        try:
+            # Wait a moment for services to fully initialize
+            await asyncio.sleep(2)
+            
+            devices = await self.get_all_devices()
+            
+            for device in devices:
+                # Get current device status from communication service
+                current_status = await self._get_device_status(device.id)
+                
+                # Update device status if it has changed
+                if current_status != device.status:
+                    await self.db_service.update_device_status(device.id, current_status)
+                    
+                    # Log status change
+                    await self.db_service.add_log(LogEntry(
+                        level=LogLevel.INFO,
+                        message=f"Initial device status: {current_status.value}",
+                        device_id=device.id,
+                        component="device_service",
+                        timestamp=datetime.now()
+                    ))
+                    
+                    logger.info(f"Device {device.id} initial status: {current_status.value}")
+                    
+        except Exception as e:
+            logger.error(f"Error in initial device status check: {e}")
     
     async def discover_devices(self):
         """Broadcast device discovery message"""

@@ -33,6 +33,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // First load devices from backend
+    this.deviceService.refreshDevices();
     this.loadDashboardData();
     this.subscribeToRealtimeUpdates();
   }
