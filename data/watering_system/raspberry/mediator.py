@@ -31,6 +31,7 @@ REGISTRY_PATH = os.getenv("REGISTRY_PATH", "/data/devices.json")
 
 # Seconds to wait for ESP responses over local RPC
 RPC_TIMEOUT = float(os.getenv("RPC_TIMEOUT", "8"))
+RPC_MAX_RETRIES = float(os.getenv("RPC_TIMEOUT", "3"))    # how many times to retry on timeout
 
 # =========================
 # Simple logger
@@ -78,7 +79,7 @@ def save_registry():
 # =========================
 class MqttRpcClient:
     """
-    Lightweight RPC over MQTT with requestId.
+    Lightweight RPC over MQTT with requestId and retry support.
 
     - Publish request to:   <device_id>/<method_topic>
       Examples:
@@ -132,37 +133,54 @@ class MqttRpcClient:
              params: Optional[Dict[str, Any]] = None,
              timeout: float = RPC_TIMEOUT) -> Any:
         """
-        Generic RPC call.
+        Generic RPC call with retry.
         method_topic example: "bucket/get", "pump/run", "wifi/get", "pump/get", "config/name"
         """
-        base = method_topic.split("/", 1)[0]  # "pump" from "pump/run"
-        req_id = uuid.uuid4().hex
-        event = threading.Event()
-        with self._lock:
-            self.pending[req_id] = {"event": event, "response": None}
+        last_error = None
+        for attempt in range(1, RPC_MAX_RETRIES + 1):
+            try:
+                base = method_topic.split("/", 1)[0]  # "pump" from "pump/run"
+                req_id = uuid.uuid4().hex
+                event = threading.Event()
+                with self._lock:
+                    self.pending[req_id] = {"event": event, "response": None}
 
-        response_topic = f"{device_id}/{base}/response/{req_id}"
-        request_topic  = f"{device_id}/{method_topic}"
+                response_topic = f"{device_id}/{base}/response/{req_id}"
+                request_topic  = f"{device_id}/{method_topic}"
 
-        # subscribe to response topic for this request only
-        self.client.subscribe(response_topic)
+                # subscribe to response topic for this request only
+                self.client.subscribe(response_topic)
 
-        payload = {"requestId": req_id, "params": params or {}}
-        self.client.publish(request_topic, json.dumps(payload))
-        log(f"[rpc] → {request_topic} {payload}")
+                payload = {"requestId": req_id, "params": params or {}}
+                self.client.publish(request_topic, json.dumps(payload))
+                log(f"[rpc] attempt {attempt}/{RPC_MAX_RETRIES} → {request_topic} {payload}")
 
-        if event.wait(timeout):
-            with self._lock:
-                resp = self.pending.pop(req_id, None)
-            if not resp or not resp.get("response"):
-                raise TimeoutError("Response missing after event set")
-            return resp["response"].get("result")
-        else:
-            with self._lock:
-                self.pending.pop(req_id, None)
-            raise TimeoutError(f"RPC timeout waiting for {response_topic}")
+                if event.wait(timeout):
+                    with self._lock:
+                        resp = self.pending.pop(req_id, None)
+                    if not resp or not resp.get("response"):
+                        raise TimeoutError("Response missing after event set")
+                    return resp["response"].get("result")
+                else:
+                    raise TimeoutError(f"RPC timeout waiting for {response_topic}")
 
-    # Convenience helpers (optional)
+            except TimeoutError as e:
+                log(f"[rpc] timeout on attempt {attempt}/{RPC_MAX_RETRIES}")
+                last_error = e
+                # retry if attempts left
+            except Exception as e:
+                log(f"[rpc] error: {e}")
+                last_error = e
+                break  # non-timeout error → no retry
+
+            finally:
+                with self._lock:
+                    self.pending.pop(req_id, None)
+
+        # If we got here, all retries failed
+        raise last_error or TimeoutError(f"RPC failed after {RPC_MAX_RETRIES} retries")
+
+    # Convenience helpers
     def run_pump(self, device_id: str, seconds: int) -> Any:
         return self.call(device_id, "pump/run", {"duration": seconds})
 
@@ -247,6 +265,16 @@ def on_vm_message(client, userdata, msg):
     req_id = payload.get("requestId", "")
     params = payload.get("params", {}) or {}
     parts = topic.split("/")
+
+    # --- Handle devices/mediator/devices/get ---
+    if topic == f"{VM_BASE_PREFIX}/mediator/devices/get":
+        # Respond with all devices in the registry
+        resp_topic = f"{VM_BASE_PREFIX}/mediator/devices/response/{req_id}"
+        result = list(_device_registry.values())
+        resp = {"requestId": req_id, "result": result}
+        safe_publish_vm(resp_topic, json.dumps(resp).encode())
+        log(f"[vm] Sent device registry to {resp_topic}")
+        return
 
     # Expected command topic format:
     #   devices/<device_id>/<segment>/get
